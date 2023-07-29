@@ -1,0 +1,81 @@
+rem 设置变量用于判断是否出现错误
+set error_occurred=false
+
+rem 1.复制文件ndp48-web.exe到D盘根目录
+copy "F:\软件\ndp48-web.exe" "D:\" || set error_occurred=true
+
+rem 2.运行ndp48-web.exe
+start "" "D:\ndp48-web.exe" || set error_occurred=true
+
+rem 3.创建名为"PCL II"的文件夹，用于存放启动器及游戏
+if not exist "D:\PCL II" (
+    mkdir "D:\PCL II" || set error_occurred=true
+)
+
+rem 4.复制Plain Craft Launcher 2.exe文件至D:\PCLII,若文件已存在则覆盖原有文件
+copy /y "F:\软件\Plain Craft Launcher 2.exe" "D:\PCL II" || set error_occurred=true
+
+rem 5.在桌面创建两个文件夹，分别为“模组”和“皮肤”
+md "%userprofile%\Desktop\模组" || set error_occurred=true
+md "%userprofile%\Desktop\皮肤" || set error_occurred=true
+
+rem 6.询问用户是否要复制"模组"和"皮肤"文件到电脑桌面的“模组”文件夹和“皮肤”文件夹中
+set /p copyConfirm=是否将模组和皮肤电脑桌面中?(y/n)
+
+if "%copyConfirm%"=="y" (
+    rem 复制模组文件夹
+    xcopy /e /y "F:\Minecraft\模组" "%userprofile%\Desktop\模组" || set error_occurred=true
+    rem 复制皮肤文件夹
+    xcopy /e /y "F:\Minecraft\皮肤" "%userprofile%\Desktop\皮肤" || set error_occurred=true
+)
+
+rem 7.创建游戏文件夹
+if not exist "D:\PCL II\.minecraft" (
+    mkdir "D:\PCL II\.minecraft" || set error_occurred=true
+    echo Successfully created folder .minecraft in D:\PCL II
+) else (
+    echo Folder .minecraft already exists in D:\PCL II
+)
+
+rem 8.复制启动器配置文件
+if not exist "D:\PCL II\PCL" mkdir "D:\PCL II\PCL" || set error_occurred=true
+xcopy /s /e /h /y "F:\Minecraft\PCL" "D:\PCL II\PCL" || set error_occurred=true
+
+rem 9.复制游戏文件
+set "src_folder=F:\Minecraft\.minecraft"
+set "dest_folder=D:\PCL II\.minecraft"
+
+set /p copy_game_files=是否要复制游戏文件？(y/n)
+
+if /I "%copy_game_files%"=="y" (
+    xcopy "%src_folder%" "%dest_folder%" /H /E /V /I /Y || set error_occurred=true
+    echo 游戏文件已成功复制！
+) else if /I "%copy_game_files%"=="n" (
+    echo 已跳过操作! 继续执行下一条指令...
+) else (
+    echo 输入无效!
+    set error_occurred=true
+)
+
+rem 10.根据用户选择运行Plain Craft Launcher 2.exe
+if /I "%copy_game_files%"=="y" (
+    start "" "D:\PCL II\Plain Craft Launcher 2.exe" || set error_occurred=true
+)
+
+rem 11.用Windows资源管理器打开文件夹“D:\PCL II\”
+start "" "D:\PCL II"
+
+rem 判断是否出现错误，并执行相应操作
+if %error_occurred%==true (
+    echo 运行过程中出现错误,请检查后上报给George,按任意键关闭...
+    pause > nul
+) else (
+    rem 关闭命令提示符窗口
+    exit
+)
+
+
+
+
+
+
